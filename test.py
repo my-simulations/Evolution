@@ -27,8 +27,8 @@ class Window(QMainWindow):
 
 def app():
     a = QApplication(sys.argv)
-    w = Window()
-    w.show()
+    wind = Window()
+    wind.show()
     sys.exit(a.exec_())
 
 
