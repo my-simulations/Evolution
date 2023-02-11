@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from abc import ABC, abstractmethod
 import sys
 
 
@@ -55,6 +56,9 @@ class Grid(QtWidgets.QWidget):
         self.x_size = ImageWidget.size[0] // self.x_blocks
         self.y_size = ImageWidget.size[1] // self.y_blocks
     
+    def block_to_px(self):
+        pass
+    
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
 
@@ -87,35 +91,74 @@ class ImageWidget(QtWidgets.QWidget):
             object.draw(painter)
 
 
-class Cell:
+class Cell(ABC):
     '''
     in progress
 
     directions:
-    1 2 3
-    8 0 4
-    7 6 5
+    0 1 2
+    7 x 3
+    6 5 4
     this is closed by mod 8
     '''
 
-    directions = {1: (-1, -1), 2: (0, -1), 3: (1, -1), 
-                    8: (-1, 0), 0: (0, 0), 4: (1, 0),
-                    7: (-1, 1), 6: (0, 1), 5: (1, 1)}
+    directions = {0: (-1, -1), 1: (0, -1), 2: (1, -1), 
+                  7: (-1, 0),              3: (1, 0),
+                  6: (-1, 1),  5: (0, 1),  4: (1, 1)}
 
     def __init__(self, x, y, dir):
         self.x = x
         self.y = y
         self.trend = dir % 8 #cell view direction
-        self.eyes = ( (self.eye + 1) % 8, self.eye, (self.eye + 7) % 8 ) #directions that cell sees
+        self.eyes = ( (self.trend + 1) % 8, self.trend, (self.trend + 7) % 8 ) #directions that cell sees
         self.vision = [(self.x + Cell.directions[self.eyes[0]][0], self.y + Cell.directions[self.eyes[0]][1]),
                          (self.x + Cell.directions[self.eyes[1]][0], self.y + Cell.directions[self.eyes[1]][1]),
                          (self.x + Cell.directions[self.eyes[2]][0], self.y + Cell.directions[self.eyes[2]][1])] #coordinates that cell sees : [(x1,y1), (x2,y2), (x3,y3)]
+        
+        self.energy = 50
+    
+    def think(self):
+        pass
     
     def move(self):
         pass
 
-        
+    def rotate(self):
+        pass
 
+    @abstractmethod
+    def draw(self):
+        pass
+
+
+class Herbivore(Cell):
+
+    def __init__(self, x, y, dir):
+        super().__init__(x, y, dir)
+        self.type = 'herbivore'
+    
+    def draw(self):
+        pass
+
+
+class Predator(Cell):
+
+    def __init__(self, x, y, dir):
+        super().__init__(x, y, dir)
+        self.type = 'predator'
+
+    def draw(self):
+        pass
+
+
+class Cannibal_predator(Cell):
+
+    def __init__(self, x, y, dir):
+        super().__init__(x, y, dir)
+        self.type = 'cannibal'
+    
+    def draw(self):
+        pass
 
 
 class Circle:
