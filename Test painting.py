@@ -1,8 +1,8 @@
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt6 import QtGui
+from PyQt6.QtWidgets import QApplication, QMainWindow
 import sys
-from PyQt5.QtGui import QPainter, QBrush, QPen
-from PyQt5.QtCore import Qt, QTimer
+from PyQt6.QtGui import QPainter, QBrush, QPen
+from PyQt6.QtCore import Qt, QTimer
 import time
 
 
@@ -33,7 +33,7 @@ class Window(QMainWindow):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setPen(QPen(Qt.green, 8, Qt.DashLine))
+        painter.setPen(QPen(Qt.green, 8))
         self.paint_line(painter)
 
     def paint_line(self, painter):
@@ -48,4 +48,4 @@ class Window(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = Window()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
