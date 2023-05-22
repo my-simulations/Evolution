@@ -13,13 +13,12 @@ class Ui_MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Evolution')
-        self.setFixedWidth(1100)
-        self.setFixedHeight(800)
+        self.resize(1100, 800)
 
         self.board = Board()
 
         self.widget = QWidget(self.board)
-        # self.widget.setGeometry(QRect(0,0,800,800))
+        self.widget.setGeometry(QRect(0, 0, 800, 800))
         # self.widget.setStyleSheet('background-color: rgb(134, 230, 141);')
 
         self.play_pause_btn = QPushButton(self.board)
@@ -40,7 +39,7 @@ class Ui_MainWindow(QMainWindow):
         else:
             timer.timeout.connect(self.board.start)
             self.play_pause_btn.setText('Pause')
-            timer.start(300)
+            timer.start(3000)
 
 
 class Board(QFrame):
