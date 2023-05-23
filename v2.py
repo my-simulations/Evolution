@@ -39,19 +39,18 @@ class MyWindow(object):
                 self.is_playing = False
                 self.play_pause_btn.setText('Click to resume')
                 self.game_widget.timer.stop()
-                self.game_widget.clear()
             else:
                 self.is_playing = True
                 self.play_pause_btn.setText('Click to stop')
                 self.game_widget.timer.start(self.tick_duration)
-                self.game_widget.data_to_draw(Circle())
+                # self.game_widget.data_to_draw(Circle())
 
         else:
             self.is_started = True
             self.is_playing = True
             self.play_pause_btn.setText('Click to stop')
             self.game_widget.timer.start(self.tick_duration)
-            self.game_widget.data_to_draw(Circle(self.game_widget.x, self.game_widget.y))
+            # self.game_widget.data_to_draw(Circle(self.game_widget.x, self.game_widget.y))
 
 
 
@@ -96,6 +95,9 @@ class ImageWidget(QtWidgets.QWidget):
     def tick(self):
         self.x += 10
         self.y += 10
+
+        self.clear()
+        self.data_to_draw(Circle(self.x, self.y))
 
         print(self.x)
     
