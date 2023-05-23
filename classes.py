@@ -39,13 +39,27 @@ class Cell:
     def rotate(self, direction):
         self.trend = direction % 8
         self.get_vision_from_direction(self.trend)
-        self.action()
+        return ['rotate', self.type, (self.trend)]
 
     def reproduction(self):
-        '''in progress'''
+        if self.energy <= 10:
+            return
+        mut_factor = np.random.binomial(n=1, p=0.8)
+        if mut_factor == 1:
+            new_type = self.type
+        else:
+            if self.type == 2:
+                new_type = 3
+            else:
+                new_type = 2
+        
+        new_x, new_y = self.vision[1]
+        new_dir = self.trend
         self.energy -= 2
         self.energy = self.energy // 2
-        return self.x, self.y, dir, self.type, self.energy // 2
+        new_energy = self.energy
+
+        return ['reproduction', self.type, (new_type, new_x, new_y, new_dir, new_energy)]
 
 
 class Herbivore(Cell):
@@ -58,16 +72,21 @@ class Herbivore(Cell):
 
     def photosynthesis(self):
         self.energy += 1
-        self.action()
+        return ['photosynthesis', self.type, ()]
 
     def move(self, idx_to_move):
         '''idx_to_move = 0, 1, 2 - index of self.vision'''
         if self.near_objects[idx_to_move] in set(1, 2, 3):
-            self.photosynthesis()
+            return
         else:
-            self.x = self.vision[idx_to_move][0]
-            self.y = self.vision[idx_to_move][1]
-            self.action()
+            x0 = self.x
+            y0 = self.y
+            new_x = self.vision[idx_to_move][0]
+            new_y = self.vision[idx_to_move][1]
+            self.x = new_x
+            self.y = new_y
+
+            return ['move', self.type, (x0, y0, new_x, new_y)]
     
     def think(self, time):
         data0 = np.zeros(14)
@@ -101,7 +120,7 @@ class Herbivore(Cell):
                     return res
                 else:
                     next
-                    
+
             elif step_id == 5:
                 return self.photosynthesis()
 
@@ -120,16 +139,22 @@ class Predator(Cell):
     def move(self, idx_to_move: int):
         '''idx_to_move = 0, 1, 2 - index of self.vision'''
         if self.near_objects[idx_to_move] in set(2, 3):
-            self.energy += 1
+            self.energy += 3
+            type_decision = 'eat'
         elif self.near_objects[idx_to_move] == 1:
             return
         else:
             self.energy -= 1
+            type_decision = 'move'
 
-        self.x = self.vision[idx_to_move][0]
-        self.y = self.vision[idx_to_move][1]
+        x0 = self.x
+        y0 = self.y
+        new_x = self.vision[idx_to_move][0]
+        new_y = self.vision[idx_to_move][1]
+        self.x = new_x
+        self.y = new_y
 
-        self.action()
+        return [type_decision, self.type, (x0, y0, new_x, new_y)]
     
     def think(self, time):
         data0 = np.zeros(14)
