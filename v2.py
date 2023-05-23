@@ -29,41 +29,43 @@ class MyWindow(object):
         self.is_started = False
         self.is_playing = False
 
+        self.tick_duration = 1000
+
+
     def play_pause(self):
         if self.is_started:
 
             if self.is_playing:
                 self.is_playing = False
                 self.play_pause_btn.setText('Click to resume')
+                self.game_widget.timer.stop()
                 self.game_widget.clear()
             else:
                 self.is_playing = True
                 self.play_pause_btn.setText('Click to stop')
+                self.game_widget.timer.start(self.tick_duration)
                 self.game_widget.data_to_draw(Circle())
 
         else:
             self.is_started = True
             self.is_playing = True
             self.play_pause_btn.setText('Click to stop')
-            self.game_widget.data_to_draw(Circle())
+            self.game_widget.timer.start(self.tick_duration)
+            self.game_widget.data_to_draw(Circle(self.game_widget.x, self.game_widget.y))
+
+
 
 
 class Grid(QtWidgets.QWidget):
 
     def __init__(self, widget):
         super().__init__(widget)
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.tick)
-
 
         self.x_blocks = 50
         self.y_blocks = 50
         self.x_size = ImageWidget.size[0] // self.x_blocks
         self.y_size = ImageWidget.size[1] // self.y_blocks
 
-
-    def tick(self):
-        pass
     
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
@@ -84,6 +86,18 @@ class ImageWidget(QtWidgets.QWidget):
     def __init__(self, widget):
         super().__init__(widget)
         self.data=[]
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.tick)
+
+        self.x = 100
+        self.y = 100
+
+    def tick(self):
+        self.x += 10
+        self.y += 10
+
+        print(self.x)
     
     def data_to_draw(self, data):
         self.data.append(data)
@@ -101,9 +115,9 @@ class ImageWidget(QtWidgets.QWidget):
 
 class Circle:
 
-    def __init__(self):
-        self.x = 100
-        self.y = 100
+    def __init__(self, x=100, y=100):
+        self.x = x
+        self.y = y
     
     def draw(self, painter):
         painter.setPen(QtGui.QColor(0x474747))
