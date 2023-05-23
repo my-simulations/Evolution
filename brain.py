@@ -10,9 +10,10 @@ def leaky_relu(x: np.ndarray):
 def func(x: np.ndarray):
     '''
     x - np.ndarray with shape=(6,) or shape=(5,)
-    return tuple(np.ndarray(p1, p2, p3, p4, p5), int) or tuple(np.ndarray(p1, p2, p3, p4), int)
+    return tuple(np.ndarray(p1, p2, p3, p4, p5, p6), int) or tuple(np.ndarray(p1, p2, p3, p4, p5), int)
     where p1, p2, p3 - probabilities for idx_to_move,
-    p4 - prabability for rotate, p5 - probability for photosynthesis for herbivores
+    p4 - prabability for rotate, p5 - probability for reproduction,
+    p6 - probability for photosynthesis only for herbivores
     and int - direction for rotating
     '''
     p = x[:-1]
@@ -50,22 +51,22 @@ class network:
         type=3 for predators
         '''
         if weights1:
-            self.linear1 = linear(input_dim=14, output_dim=10, weights=weights1)
+            self.linear1 = linear(input_dim=14, output_dim=11, weights=weights1)
         else:
-            self.linear1 = linear(input_dim=14, output_dim=10)
+            self.linear1 = linear(input_dim=14, output_dim=11)
 
         if weights2:
             if type == 2:
-                self.linear2 = linear(input_dim=10, output_dim=6, weights=weights2)
+                self.linear2 = linear(input_dim=11, output_dim=7, weights=weights2)
             elif type == 3:
-                self.linear2 = linear(input_dim=10, output_dim=5, weights=weights2)
+                self.linear2 = linear(input_dim=11, output_dim=6, weights=weights2)
             else:
                 raise AttributeError('Incorrect type')
         else:
             if type == 2:
-                self.linear2 = linear(input_dim=10, output_dim=6)
+                self.linear2 = linear(input_dim=11, output_dim=7)
             elif type == 3:
-                self.linear2 = linear(input_dim=10, output_dim=5)
+                self.linear2 = linear(input_dim=11, output_dim=6)
             else:
                 raise AttributeError('Incorrct type')
     
