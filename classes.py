@@ -101,6 +101,10 @@ class Herbivore(Cell):
                     return res
                 else:
                     next
+                    
+            elif step_id == 5:
+                return self.photosynthesis()
+
 
 
 
@@ -159,9 +163,6 @@ class Predator(Cell):
                     return res
                 else:
                     next
-
-            elif step_id == 5:
-                return self.photosynthesis()
 
 
 class Wall:
