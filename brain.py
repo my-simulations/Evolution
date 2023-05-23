@@ -42,7 +42,7 @@ class linear:
         return data @ self.weights
 
 
-class herb_network:
+class network:
 
     def __init__(self, type: int, weights1: np.ndarray=None, weights2: np.ndarray=None):
         '''
