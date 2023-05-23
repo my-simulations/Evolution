@@ -1,3 +1,4 @@
+import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 import sys
@@ -43,14 +44,12 @@ class MyWindow(object):
                 self.is_playing = True
                 self.play_pause_btn.setText('Click to stop')
                 self.game_widget.timer.start(self.tick_duration)
-                # self.game_widget.data_to_draw(Circle())
 
         else:
             self.is_started = True
             self.is_playing = True
             self.play_pause_btn.setText('Click to stop')
             self.game_widget.timer.start(self.tick_duration)
-            # self.game_widget.data_to_draw(Circle(self.game_widget.x, self.game_widget.y))
 
 
 
@@ -121,14 +120,15 @@ class Circle:
         self.x = x
         self.y = y
     
-    def draw(self, painter):
-        painter.setPen(QtGui.QColor(0x474747))
-        painter.setBrush(QtGui.QColor(0x474747))
-        painter.drawEllipse(self.x, self.y, 20, 20)
+    def draw(self, painter, color=0x474747):
+        painter.setPen(QtGui.QColor(color))
+        painter.setBrush(QtGui.QColor(color))
+        painter.drawEllipse(self.x, self.y, 15, 15)
 
 
 class Floor(): # тут что-то про ограничение коробки
-    pass
+    field = np.zeros()
+    field.reshape(50, 50)
 
 
 

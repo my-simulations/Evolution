@@ -44,7 +44,7 @@ class Cell:
         '''in progress'''
         self.energy -= 2
         self.energy = self.energy // 2
-        return
+        return self.x, self.y, dir, self.type, self.energy // 2
 
 
 class Herbivore(Cell):
