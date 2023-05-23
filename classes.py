@@ -10,15 +10,15 @@ class Cell:
     this is closed by mod 8
     '''
 
-    directions = {3: (-1, 1), 2: (0, 1), 1: (1, 1),
-                  4: (-1, 0), 8: (0, 0), 0: (1, 0),
-                  5: (-1, -1) , 6: (0, -1), 7: (1, -1)}
+    directions = {3: (-1, -1), 2: (-1, 0), 1: (-1, 1),
+                  4: (0, -1), 8: (0, 0), 0: (0, 1),
+                  5: (1, -1) , 6: (1, 0), 7: (1, 1)}
 
     def __init__(self, x, y, type, dir, energy):
         self.energy = energy
         self.type = type
-        self.x = x
-        self.y = y
+        self.x = x # row
+        self.y = y # column
         self.trend = dir % 8  # cell view direction
         self.get_vision_from_direction(self.trend)
 
@@ -29,14 +29,14 @@ class Cell:
                        (self.x + Cell.directions[self.eyes[2]][0], self.y + Cell.directions[self.eyes[2]][1])]  # coordinates that cell sees : [(x1,y1), (x2,y2), (x3,y3)]
 
     def get_objects_for_vision(self, objects):
-        self.near_objects = [objects[self.vision[0][0]][self.vision[0][1]],
-                             objects[self.vision[1][0]][self.vision[1][1]],
-                             objects[self.vision[2][0]][self.vision[2][1]]]
+        self.near_objects = [objects[self.vision[0][1]][self.vision[0][0]],
+                             objects[self.vision[1][1]][self.vision[1][0]],
+                             objects[self.vision[2][1]][self.vision[2][0]]]
 
     def rotate(self, direction):
         self.trend = direction % 8
         self.get_vision_from_direction(self.trend)
-        return ['rotate', self.type, (self.trend)]
+        return ['rotate', self.type, (self.x, self.y, self.trend)]
 
     def reproduction(self):
         if self.energy <= 10:
@@ -49,7 +49,9 @@ class Cell:
                 new_type = 3
             else:
                 new_type = 2
-        
+
+        if self.near_objects[1] == 1:
+            return
         new_x, new_y = self.vision[1]
         new_dir = self.trend
         self.energy -= 2
@@ -73,7 +75,8 @@ class Herbivore(Cell):
 
     def move(self, idx_to_move):
         '''idx_to_move = 0, 1, 2 - index of self.vision'''
-        if self.near_objects[idx_to_move] in set(1, 2, 3):
+        self.get_vision_from_direction(self.trend)
+        if self.near_objects[idx_to_move] in set((1, 2, 3)):
             return
         else:
             x0 = self.x
@@ -83,44 +86,50 @@ class Herbivore(Cell):
             self.x = new_x
             self.y = new_y
 
-            self.get_vision_from_direction()
+            self.get_vision_from_direction(self.trend)
 
             return ['move', self.type, (x0, y0, new_x, new_y)]
     
     def think(self, time):
         data0 = np.zeros(14)
-        data0[self.near_objects[0]] = 1
-        data0[self.near_objects[1] + 4] = 1
-        data0[self.near_objects[2] + 4*2] = 1
+        # print(self.near_objects)
+        data0[int(self.near_objects[0])] = 1
+        # print(10)
+        data0[int(self.near_objects[1] + 4)] = 1
+        data0[int(self.near_objects[2] + 4*2)] = 1
         data0[-2] = self.energy
         data0[-1] = np.sin(time)
-
+        # print('10')
         res = self.brain.forward(data0)
 
         return res
     
     def step(self, time):
+        # print('1')
         p, dir = self.think(time)
+        # print('2')
         steps_ids = np.argsort(p)[::-1]
+        # print(3)
 
         for step_id in steps_ids:
-
-            if step_id in set(0, 1, 2):
+            # print(steps_ids)
+            if step_id in set((0, 1, 2)):
+                # print(step_id, 1)
+                # print(self.move(step_id))
                 if res := self.move(step_id):
                     return res
-                else:
-                    next
             
             elif step_id == 3:
+                # print(step_id, 2)
                 return self.rotate(dir)
 
             elif step_id == 4:
+                # print(step_id, 4)
                 if res := self.reproduction():
                     return res
-                else:
-                    next
 
             elif step_id == 5:
+                # print(step_id, 5)
                 return self.photosynthesis()
 
 
@@ -133,11 +142,11 @@ class Predator(Cell):
 
     def __init__(self, x, y, dir, energy):
         super().__init__(x, y, Predator.type, dir, energy)
-        self.brain(self.type)
+        self.brain = network(self.type)
 
     def move(self, idx_to_move: int):
         '''idx_to_move = 0, 1, 2 - index of self.vision'''
-        if self.near_objects[idx_to_move] in set(2, 3):
+        if self.near_objects[idx_to_move] in set((2, 3)):
             self.energy += 3
             type_decision = 'eat'
         elif self.near_objects[idx_to_move] == 1:
@@ -153,15 +162,15 @@ class Predator(Cell):
         self.x = new_x
         self.y = new_y
 
-        self.get_vision_from_direction()
+        self.get_vision_from_direction(self.trend)
 
         return [type_decision, self.type, (x0, y0, new_x, new_y)]
     
     def think(self, time):
         data0 = np.zeros(14)
-        data0[self.near_objects[0]] = 1
-        data0[self.near_objects[1] + 4] = 1
-        data0[self.near_objects[2] + 4*2] = 1
+        data0[int(self.near_objects[0])] = 1
+        data0[int(self.near_objects[1] + 4)] = 1
+        data0[int(self.near_objects[2] + 4*2)] = 1
         data0[-2] = self.energy
         data0[-1] = np.sin(time)
 
@@ -175,7 +184,7 @@ class Predator(Cell):
 
         for step_id in steps_ids:
 
-            if step_id in set(0, 1, 2):
+            if step_id in set((0, 1, 2)):
                 if res := self.move(step_id):
                     return res
                 else:

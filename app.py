@@ -32,7 +32,7 @@ class MyWindow(object):
         self.is_started = False
         self.is_playing = False
 
-        self.tick_duration = 1000
+        self.tick_duration = 200
 
         self.game_field = Field()
         self.list_of_cells = []
@@ -41,8 +41,11 @@ class MyWindow(object):
         for i in range(2):
             self.list_of_cells.append(Predator(randint(1, 50), randint(1, 50), randint(0, 7), randint(5, 30)))
 
+        # for i in range(1):
+        #     self.list_of_cells.append(Herbivore(1, 1, 3, 40))
+
         for i in self.list_of_cells:
-            self.game_field.cell_born(i.type, i.x, i.y)
+            self.game_field.cell_born(i.type, i.x, i.y, i.trend)
 
 
     def play_pause(self):
@@ -52,40 +55,69 @@ class MyWindow(object):
                 self.is_playing = False
                 self.play_pause_btn.setText('Click to resume')
                 self.game_widget.timer.stop()
-                self.mega_think()
+                # self.manager(0)
             else:
                 self.is_playing = True
                 self.play_pause_btn.setText('Click to stop')
                 self.game_widget.timer.start(self.tick_duration)
-                self.mega_think()
+                # self.manager(1)
 
         else:
             self.is_started = True
             self.is_playing = True
             self.play_pause_btn.setText('Click to stop')
             self.game_widget.timer.start(self.tick_duration)
-            self.mega_think()
+            # self.manager(1)
 
-    def manager(self, decision):
-        for j in decision:
-            if j[0] == 'eat':
-                (t, x_0, y_0, x_1, y_1) = j[1]
+    def manager(self):
+        # print("man strt")
+        i = 0
+        cur_lenght = len(self.list_of_cells)
+        # print(i, cur_lenght)
+        while i < cur_lenght:
+            # print('before')
+            self.list_of_cells[i].get_vision_from_direction(self.list_of_cells[i].trend)
+            self.list_of_cells[i].get_objects_for_vision(self.game_field.get_info()[:, :, 0])
+            # print('after')
+            decision = self.list_of_cells[i].step(self.game_widget.time)
+            print(decision[0])
+            print(self.list_of_cells[i].x, self.list_of_cells[i].y, self.list_of_cells[i].trend)
+            print(self.list_of_cells[i].vision, self.list_of_cells[i].near_objects)
+            # print('t, dec', self.game_widget.time, decision)
+            # print('decis iter start')
+            # print('decision', decision)
+            if decision[0] == 'eat':
+                t = decision[1]
+                coords = decision[2]
                 for k in self.list_of_cells:
-                    if k.x == x_1 and k.y == y_1:
+                    if k.x == coords[2] and k.y == coords[3]:
                         self.list_of_cells.remove(k)
-                self.game_field.cell_step(t, x_0, y_0, x_1, y_1)
-            elif j[0] == 'born':
-                (t, x_1, y_1, dir, en) = j[1]
-                self.game_field.cell_born(t, x_1, y_1)
-                if t == 2:
-                    self.list_of_cells.append(Herbivore(x_1, y_1, dir, en))
+                        i -= 1
+                        cur_lenght -= 1
+                self.game_field.cell_step(t, coords[0], coords[1], coords[2], coords[3])
+            elif decision[0] == 'reproduction':
+                t = decision[1]
+                coords = decision[2]
+                self.game_field.cell_born(coords[0], coords[1], coords[2], coords[3])
+                if coords[0] == 2:
+                    self.list_of_cells.append(Herbivore(coords[1], coords[2], coords[3], coords[4]))
                 else:
-                    self.list_of_cells.append(Predator(x_1, y_1, dir, en))
-            elif j[0] == 'move':
-                (t, x_0, y_0, x_1, y_1) = j[1]
-                self.game_field.cell_step(t, x_0, y_0, x_1, y_1)
+                    self.list_of_cells.append(Predator(coords[1], coords[2], coords[3], coords[4]))
+            elif decision[0] == 'move':
+                t = decision[1]
+                coords = decision[2]
+                self.game_field.cell_step(t, coords[0], coords[1], coords[2], coords[3])
+                # print('move 3', i, cur_lenght)
+            elif decision[0] == 'rotate':
+                t = decision[1]
+                coords = decision[2]
+                self.game_field.rotate(coords[0], coords[1], coords[3])
+                # print('none')
             else:
                 pass
+            self.list_of_cells[i].get_vision_from_direction(self.list_of_cells[i].trend)
+            self.list_of_cells[i].get_objects_for_vision(self.game_field.get_info()[:, :, 0])
+            i += 1
 
 class Grid(QtWidgets.QWidget):
 
@@ -128,20 +160,16 @@ class ImageWidget(QtWidgets.QWidget):
         self.y = 24
 
     def tick(self):
-        a = self.x
-        self.x += randint(-1, 1)
-        b = self.y
-        self.y += randint(-1, 1)
         self.time += 1
 
-        print(self.time)
+        print('time =', self.time)
 
-        ui.game_field.cell_step(2, a, b, self.x, self.y)
-        ui.game_field.cell_step(3, a + 3, b, self.x + 3, self.y)
         self.clear()
         self.data_to_draw()
 
-        print(self.x)
+        ui.manager()
+
+        # print(self.x)
     
     def data_to_draw(self):
         self.data = ui.game_field.get_info()
@@ -157,12 +185,12 @@ class ImageWidget(QtWidgets.QWidget):
             for y in range(len(self.data)):
                 # if self.data[x][y] == 0:
                 #     Square(x, y).draw(painter, 0x009)
-                if self.data[x][y] == 1:
+                if self.data[x][y][0] == 1:
                     Square(x, y).draw(painter, 0x474747)
-                elif self.data[x][y] == 2:
-                    Circle(x, y, randint(0, 7)).draw(painter, 0x33FF33)
-                elif self.data[x][y] == 3:
-                    Circle(x, y, randint(0, 7)).draw(painter, 0xFF3300)
+                elif self.data[x][y][0] == 2:
+                    Circle(x, y, self.data[x][y][1]).draw(painter, 0x33FF33)
+                elif self.data[x][y][0] == 3:
+                    Circle(x, y, self.data[x][y][1]).draw(painter, 0xFF3300)
 
 
 
@@ -192,26 +220,30 @@ class Circle:
         painter.setPen(QtGui.QColor(0x009))
         painter.setBrush(QtGui.QColor(0x009))
         painter.drawLine(self.x+6, self.y+6,
-                         self.x+6 + round(6*np.cos(np.pi/8*self.direction)), self.y+6 + round(6*np.sin(np.pi/8*self.direction)))
+                         self.x+6 + round(6*np.cos(np.pi/8*self.direction)),
+                         self.y+6 + round(6*np.sin(np.pi/8*self.direction)))
 
 
 
 class Field:
     def __init__(self):
-        self.field = np.zeros(2704)
-        self.field = self.field.reshape(52, 52)
+        self.field = np.zeros((52, 52, 2))
         # 0 - floor, 1 - wall, 2 - herbivore, 3 - predator
-        self.field[0, :] = np.array([1]*52)
-        self.field[:, 0] = np.array([1]*52)
-        self.field[-1, :] = np.array([1]*52)
-        self.field[:, -1] = np.array([1]*52)
+        self.field[0, :, 0] = 1
+        self.field[:, 0, 0] = 1
+        self.field[-1, :, 0] = 1
+        self.field[:, -1, 0] = 1
 
     def cell_step(self, type, x_start, y_start, x_finish, y_finish):
-        self.field[x_start, y_start] = 0
-        self.field[x_finish, y_finish] = type
+        dir = self.field[x_start, y_start, 1]
+        self.field[x_start, y_start] = [0, 0]
+        self.field[x_finish, y_finish] = [type, dir]
 
-    def cell_born(self, type, x_finish, y_finish):
-        self.field[x_finish, y_finish] = type
+    def cell_born(self, type, x_finish, y_finish, dir):
+        self.field[x_finish, y_finish] = [type, dir]
+
+    def rotate(self, x_start, y_start, dir):
+        self.field[x_start, y_start, 1] = dir
 
     def get_info(self):
         return self.field
