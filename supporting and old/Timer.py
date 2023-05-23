@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QWidget, QApplication, \
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtWidgets import QWidget, QApplication, \
     QLCDNumber, QSlider, QVBoxLayout, QHBoxLayout, QPushButton
 
 
@@ -13,7 +13,7 @@ class MainWindow(QWidget):
         # Устанавливаем значение по умолчанию на дисплей
         self.lcd.display(1)
 
-        self.slider = QSlider(Qt.Horizontal, self)
+        self.slider = QSlider(Qt.Orientation.Horizontal, self)
         # Устанавливаем минимальное и максимальное значение
         self.slider.setMinimum(1)
         self.slider.setMaximum(90)
@@ -67,4 +67,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
