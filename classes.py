@@ -33,9 +33,6 @@ class Cell:
                              objects[self.vision[1][0]][self.vision[1][1]],
                              objects[self.vision[2][0]][self.vision[2][1]]]
 
-    def action(self):
-        return self.x, self.y, self.trend
-
     def rotate(self, direction):
         self.trend = direction % 8
         self.get_vision_from_direction(self.trend)
@@ -85,6 +82,8 @@ class Herbivore(Cell):
             new_y = self.vision[idx_to_move][1]
             self.x = new_x
             self.y = new_y
+
+            self.get_vision_from_direction()
 
             return ['move', self.type, (x0, y0, new_x, new_y)]
     
@@ -153,6 +152,8 @@ class Predator(Cell):
         new_y = self.vision[idx_to_move][1]
         self.x = new_x
         self.y = new_y
+
+        self.get_vision_from_direction()
 
         return [type_decision, self.type, (x0, y0, new_x, new_y)]
     
