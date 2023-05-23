@@ -1,15 +1,15 @@
 class Cell:
     '''
     directions:
-    1 2 3
-    0 8 4
-    7 6 5
+    3 2 1
+    4 8 0
+    5 6 7
     this is closed by mod 8
     '''
 
-    directions = {1: (-1, -1), 2: (0, -1), 3: (1, -1),
-                  0: (-1, 0), 8: (0, 0), 4: (1, 0),
-                  7: (-1, 1), 6: (0, 1), 5: (1, 1)}
+    directions = {3: (-1, 1), 2: (0, 1), 1: (1, 1),
+                  4: (-1, 0), 8: (0, 0), 0: (1, 0),
+                  5: (-1, -1) , 6: (0, -1), 7: (1, -1)}
 
     def __init__(self, x, y, dir, type, energy):
         self.energy = energy

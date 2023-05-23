@@ -3,6 +3,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 import sys
 from Cells import *
+from random import randint
 
 
 class MyWindow(object):
@@ -23,7 +24,7 @@ class MyWindow(object):
 
 
         self.play_pause_btn = QtWidgets.QPushButton(MainWindow)
-        self.play_pause_btn.setGeometry(QtCore.QRect(850, 670, 200, 80))
+        self.play_pause_btn.setGeometry(QtCore.QRect(866, 670, 200, 80))
         self.play_pause_btn.setText('Start')
         self.play_pause_btn.pressed.connect(self.play_pause)
 
@@ -93,17 +94,20 @@ class ImageWidget(QtWidgets.QWidget):
         self.timer.timeout.connect(self.tick)
 
         self.time = 0
-        self.x = 1
-        self.y = 1
+        self.x = 24
+        self.y = 24
 
     def tick(self):
-        self.x += 1
-        self.y += 1
+        a = self.x
+        self.x += randint(-1, 1)
+        b = self.y
+        self.y += randint(-1, 1)
         self.time += 1
 
         print(self.time)
 
-        self.game_field.cell_step(2, self.x - 1, self.y - 1, self.x, self.y)
+        self.game_field.cell_step(2, a, b, self.x, self.y)
+        self.game_field.cell_step(3, a + 3, b, self.x + 3, self.y)
         self.clear()
         self.data_to_draw()
 
@@ -126,9 +130,9 @@ class ImageWidget(QtWidgets.QWidget):
                 if self.data[x][y] == 1:
                     Square(x, y).draw(painter, 0x474747)
                 elif self.data[x][y] == 2:
-                    Circle(x, y, 3).draw(painter, 0x090)
+                    Circle(x, y, randint(0, 7)).draw(painter, 0x33FF33)
                 elif self.data[x][y] == 3:
-                    Circle(x, y, 3).draw(painter, 0x474747)
+                    Circle(x, y, randint(0, 7)).draw(painter, 0xFF3300)
 
 
 
