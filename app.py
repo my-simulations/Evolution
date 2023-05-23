@@ -2,7 +2,7 @@ import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 import sys
-from Cells import *
+from classes import *
 from random import randint
 
 
@@ -52,33 +52,40 @@ class MyWindow(object):
                 self.is_playing = False
                 self.play_pause_btn.setText('Click to resume')
                 self.game_widget.timer.stop()
-                self.mega_think(0)
+                self.mega_think()
             else:
                 self.is_playing = True
                 self.play_pause_btn.setText('Click to stop')
                 self.game_widget.timer.start(self.tick_duration)
-                self.mega_think(1)
+                self.mega_think()
 
         else:
             self.is_started = True
             self.is_playing = True
             self.play_pause_btn.setText('Click to stop')
             self.game_widget.timer.start(self.tick_duration)
-            self.mega_think(1)
+            self.mega_think()
 
-    def mega_think(self, flag):
-        while flag:
-            for i in self.list_of_cells:
-                decisions = i.think()
-                for j in decisions:
-                    if j == False:
-                        pass
-                    elif j[0] == 'born':
-                        self.game_field.cell_born(j[1], j[2], j[3])
-                    elif j[0] == 'move' or j[0] == 'eat':
-                        self.game_field.cell_step(j[1], j[2], j[3], j[4], j[5])
-                    else:
-                        pass
+    def manager(self, decision):
+        for j in decision:
+            if j[0] == 'eat':
+                (t, x_0, y_0, x_1, y_1) = j[1]
+                for k in self.list_of_cells:
+                    if k.x == x_1 and k.y == y_1:
+                        self.list_of_cells.remove(k)
+                self.game_field.cell_step(t, x_0, y_0, x_1, y_1)
+            elif j[0] == 'born':
+                (t, x_1, y_1, dir, en) = j[1]
+                self.game_field.cell_born(t, x_1, y_1)
+                if t == 2:
+                    self.list_of_cells.append(Herbivore(x_1, y_1, dir, en))
+                else:
+                    self.list_of_cells.append(Predator(x_1, y_1, dir, en))
+            elif j[0] == 'move':
+                (t, x_0, y_0, x_1, y_1) = j[1]
+                self.game_field.cell_step(t, x_0, y_0, x_1, y_1)
+            else:
+                pass
 
 class Grid(QtWidgets.QWidget):
 
