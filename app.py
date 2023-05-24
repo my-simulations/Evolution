@@ -111,7 +111,7 @@ class MyWindow(object):
             elif decision[0] == 'rotate':
                 t = decision[1]
                 coords = decision[2]
-                self.game_field.rotate(coords[0], coords[1], coords[3])
+                self.game_field.rotate(coords[0], coords[1], coords[2])
                 # print('none')
             else:
                 pass
